@@ -190,3 +190,10 @@ for author in authors:
     scraping(driver=driver, author_name=author)
 print('名单上所有作者的论文信息抓取完毕')
 exit()
+
+# TODO 将名单提取到配置文件中
+# TODO 优化目录结构
+# TODO 去重
+# TODO 提高性能--多线程 & 多进程 & 异步IO
+
+
