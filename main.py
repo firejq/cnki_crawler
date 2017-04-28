@@ -1,18 +1,5 @@
-import random
 import time
-import os
-import openpyxl
 from util import util
-
-from pyquery import PyQuery
-from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver import DesiredCapabilities
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support import expected_conditions
-from selenium.webdriver.support.wait import WebDriverWait
-
 from crawler.scraping import scraping
 
 driver = util.getDriver('phantomjs')
