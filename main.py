@@ -13,6 +13,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 
+
 def getDriver(browser='chrome'):
     UserAgents = [
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3072.0 Safari/537.36',
@@ -40,9 +41,11 @@ def getDriver(browser='chrome'):
         dcap["phantomjs.page.settings.userAgent"] = (
             random.choice(UserAgents)
         )
-        driver = webdriver.PhantomJS(executable_path='D:\\software\\web\\phantomJS\\phantomjs-2.1.1-windows\\bin\\phantomjs.exe',
-                                     desired_capabilities=dcap)
+        driver = webdriver.PhantomJS(
+            executable_path='D:\\software\\web\\phantomJS\\phantomjs-2.1.1-windows\\bin\\phantomjs.exe',
+            desired_capabilities=dcap)
     return driver
+
 
 def is_done(author_name):
     '''
@@ -63,11 +66,11 @@ def is_done(author_name):
     else:
         return False
 
+
 def write_to_excel(res, author_name):
     path = os.getcwd() + os.sep + 'result'
     filename = 'result.xlsx'
     out_path = os.path.join(path, filename)
-
 
     if os.path.exists(out_path):
         wb = openpyxl.load_workbook(out_path)
@@ -93,6 +96,7 @@ def write_to_excel(res, author_name):
     ws.append(line)
     wb.save(out_path)
     # print('成功添加一条【' + author_name + '】的记录')
+
 
 def scraping(driver, author_name, author_company='深圳大学'):
     if is_done(author_name):
@@ -138,7 +142,8 @@ def scraping(driver, author_name, author_company='深圳大学'):
         else:
             # 结果数量超过20条，不止一页
             # 获取最大页数
-            max_page = int(driver.find_element_by_css_selector('div.TitleLeftCell').find_elements_by_tag_name('a')[-2].text)
+            max_page = int(
+                driver.find_element_by_css_selector('div.TitleLeftCell').find_elements_by_tag_name('a')[-2].text)
             for i in range(1, max_page + 1):
                 print('开始抓取第' + str(i) + '页')
                 # 使用xpath定位抓取结果列表
@@ -195,5 +200,3 @@ exit()
 # TODO 优化目录结构
 # TODO 去重
 # TODO 提高性能--多线程 & 多进程 & 异步IO
-
-
