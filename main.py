@@ -34,15 +34,17 @@ def getDriver(browser='chrome'):
     if browser == 'chrome':
         options = webdriver.ChromeOptions()
         options.add_argument('user-agent=' + random.choice(UserAgents))
-        driver = webdriver.Chrome(executable_path='D:\\software\\web\\webDriver\\chromedriver_win32\\chromedriver.exe',
+        executable_path = os.getcwd() + os.sep + 'chromedriver.exe'
+        driver = webdriver.Chrome(executable_path=executable_path,
                                   chrome_options=options)
     elif browser == 'phantomjs':
         dcap = dict(DesiredCapabilities.PHANTOMJS)
         dcap["phantomjs.page.settings.userAgent"] = (
             random.choice(UserAgents)
         )
+        executable_path = os.getcwd() + os.sep + 'phantomjs.exe'
         driver = webdriver.PhantomJS(
-            executable_path='D:\\software\\web\\phantomJS\\phantomjs-2.1.1-windows\\bin\\phantomjs.exe',
+            executable_path=executable_path,
             desired_capabilities=dcap)
     return driver
 
@@ -113,11 +115,21 @@ def scraping(driver, author_name, author_company='深圳大学'):
         except NoSuchElementException:
             print('element cannot be found!')
 
-        time.sleep(3)
+        time.sleep(4)
+
+        # TODO 改用显式等待
+        # try:
+        #     wait = WebDriverWait(driver=driver, timeout=10)
+        #     wait.until(expected_conditions.presence_of_element_located((By.XPATH, '//*[@id="iframeResult"]')))
+        #     print('wait over')
+        # except TimeoutError:
+        #     print('超时')
+        #     exit()
+
         print('开始抓取【' + author_name + '】的论文信息')
         # 切换至frameResult
         driver.switch_to_frame('iframeResult')
-
+        # 获取结果记录条数
         res_number = int(str(driver.find_element_by_css_selector('div.pagerTitleCell').text).split(' ')[2])
         if res_number <= 20:
             # 结果数量不足20条，只有一页
@@ -172,8 +184,9 @@ def scraping(driver, author_name, author_company='深圳大学'):
         print('【' + author_name + '】的所有论文信息抓取完毕\n')
 
 
-driver = getDriver('chrome')
-url = 'http://kns.cnki.net/kns/brief/result.aspx?dbprefix=scdb&action=scdbsearch&db_opt=SCDB'
+driver = getDriver('phantomjs')
+# url = 'http://kns.cnki.net/kns/brief/result.aspx?dbprefix=scdb&action=scdbsearch&db_opt=SCDB'
+url = 'http://kns.cnki.net/kns/brief/result.aspx?dbprefix=scdb'
 authors = [
     "陈思平", "陈昕", "汪天富", "谭力海", "彭珏", "但果", "叶继伦", "覃正笛",
     "张旭", "张会生", "钱建庭", "丁惠君", "刁现芬", "沈圆圆", "周永进", "孔湉湉",
@@ -193,6 +206,7 @@ for author in authors:
     driver.get(url=url)
     time.sleep(1)
     scraping(driver=driver, author_name=author)
+driver.quit()
 print('名单上所有作者的论文信息抓取完毕')
 exit()
 
