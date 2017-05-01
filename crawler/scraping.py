@@ -35,7 +35,14 @@ def scraping(driver, author_name, author_company='深圳大学', begin_time=None
     # 切换至frameResult
     driver.switch_to_frame('iframeResult')
     # 获取结果记录条数
-    res_number = int(str(driver.find_element_by_css_selector('div.pagerTitleCell').text).split(' ')[2])
+    # TODO 这里总抛异常NoSuchElementException，应改用显式等待
+    try:
+        res_number = int(str(driver.find_element_by_css_selector('div.pagerTitleCell').text).split(' ')[2])
+    except NoSuchElementException:
+        print('页面解析出错，准备进行重试')
+        time.sleep(3)
+        res_number = int(str(driver.find_element_by_css_selector('div.pagerTitleCell').text).split(' ')[2])
+
     print('开始抓取【' + author_name + '】的论文信息，共找到【' + str(res_number) + '】条记录')
     if res_number <= 20:
         # 结果数量不足20条，只有一页

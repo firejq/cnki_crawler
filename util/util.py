@@ -115,7 +115,7 @@ def change_tmp_status(author_name):
         # print(ws['A'+str(i)])
         # continue
         if ws['A'+str(i)].value == author_name:
-            ws['B'+str(i)].value ='solved'
+            ws['B'+str(i)].value = 'solved'
             wb.save(file_path)
             break
 
