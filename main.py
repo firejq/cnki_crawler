@@ -6,16 +6,19 @@ import openpyxl
 from util import util
 from crawler.scraping import scraping
 
-driver = util.getDriver('phantomjs')
-url = 'http://kns.cnki.net/kns/brief/result.aspx?dbprefix=scdb'
 welcome = '''
-//////////////////////////
-//    知网论文爬取工具   //
-//      2017-5-1        //
-//     @author firejq   //
-//////////////////////////
+//////////////////////////////////////
+//         知网论文爬取工具          //
+//             2017-5-1             //
+//          @author firejq          //
+//////////////////////////////////////
+            程序正在初始化……
 '''
 print(welcome)
+
+driver = util.getDriver('phantomjs')
+url = 'http://kns.cnki.net/kns/brief/result.aspx?dbprefix=scdb'
+
 print('请输入论文发表时间范围（若无时间范围限制，直接回车即可）：')
 begin_time = util.get_time_input('开始时间（1979-01-01 ~ 2017-12-31）：')
 end_time = util.get_time_input('截止时间（1979-01-01 ~ 2017-12-31）：')
