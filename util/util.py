@@ -1,5 +1,6 @@
 import os
 import random
+import re
 
 import openpyxl
 from selenium import webdriver
@@ -7,19 +8,21 @@ from selenium.webdriver import DesiredCapabilities
 
 
 def get_name_list():
-    # 获取名单列表
-    # authors = [
-    #     "陈思平", "陈昕", "汪天富", "谭力海", "彭珏", "但果", "叶继伦", "覃正笛",
-    #     "张旭", "张会生", "钱建庭", "丁惠君", "刁现芬", "沈圆圆", "周永进", "孔湉湉",
-    #     "陆敏华", "张新宇", "孙怡雯", "李乔亮", "齐素文", "徐海华", "倪东", "刘维湘",
-    #     "李抱朴", "黄炳升", "徐敏", "雷柏英", "胡亚欣", "何前军", "郑介志", "常春起",
-    #     "陈雯雯", "罗永祥", "黄鹏", "林静", "王倪传", "刘立", "张治国", "董磊"
-    # ]
-    name_list_file = os.getcwd() + os.sep + 'docs' + os.sep + 'name-list.txt'
-    authors = open(name_list_file, 'r', encoding='utf-8').readlines()
-    # 去除每行行尾的‘\n’
-    for i in range(0, len(authors)):
-        authors[i] = authors[i].strip('\n')
+    # 直接从内存中获取名单列表
+    authors = [
+        "陈思平", "陈昕", "汪天富", "谭力海", "彭珏", "但果", "叶继伦", "覃正笛",
+        "张旭", "张会生", "钱建庭", "丁惠君", "刁现芬", "沈圆圆", "周永进", "孔湉湉",
+        "陆敏华", "张新宇", "孙怡雯", "李乔亮", "齐素文", "徐海华", "倪东", "刘维湘",
+        "李抱朴", "黄炳升", "徐敏", "雷柏英", "胡亚欣", "何前军", "郑介志", "常春起",
+        "陈雯雯", "罗永祥", "黄鹏", "林静", "王倪传", "刘立", "张治国", "董磊"
+    ]
+
+    # 从name-list.txt获取名单
+    # name_list_file = os.getcwd() + os.sep + 'docs' + os.sep + 'name-list.txt'
+    # authors = open(name_list_file, 'r', encoding='utf-8').readlines()
+    # # 去除每行行尾的‘\n’
+    # for i in range(0, len(authors)):
+    #     authors[i] = authors[i].strip('\n')
     return authors
 
 def getDriver(browser='chrome'):
@@ -56,49 +59,43 @@ def getDriver(browser='chrome'):
     return driver
 
 
-def is_done(author_name):
-    '''
-    后期使用数据库查重，可代替此函数
-    :param author_name: 
-    :return: 
-    '''
+# def is_done(author_name):
+#     '''
+#     后期使用数据库查重，可代替此函数
+#     :param author_name:
+#     :return:
+#     '''
+#     path = os.getcwd() + os.sep + 'result'
+#     filename = 'result.xlsx'
+#     out_path = os.path.join(path, filename)
+#     if os.path.exists(out_path):
+#         wb = openpyxl.load_workbook(out_path)
+#         sheets_name = wb.get_sheet_names()
+#         if author_name in sheets_name:
+#             return True
+#         else:
+#             return False
+#     else:
+#         return False
+
+
+def write_to_excel(res):
     path = os.getcwd() + os.sep + 'result'
     filename = 'result.xlsx'
     out_path = os.path.join(path, filename)
-    if os.path.exists(out_path):
-        wb = openpyxl.load_workbook(out_path)
-        sheets_name = wb.get_sheet_names()
-        if author_name in sheets_name:
-            return True
-        else:
-            return False
+
+    wb = openpyxl.load_workbook(out_path)
+    sheet_names = wb.get_sheet_names()
+    if 'result' in sheet_names:
+        ws = wb.get_sheet_by_name('result')
+        # 检查该条记录是否已经存在
+        max_row = ws.max_row
+        for index in range(2, max_row + 1):
+            if res[0] == ws['A' + str(index)].value:
+                print('~~~~~~~~该条记录在结果集中已存在，进行下一条~~~~~~~~~')
+                return
     else:
-        return False
-
-
-def write_to_excel(res, author_name):
-    path = os.getcwd() + os.sep + 'result'
-    filename = 'result.xlsx'
-    out_path = os.path.join(path, filename)
-
-    if os.path.exists(out_path):
-        wb = openpyxl.load_workbook(out_path)
-        sheets_name = wb.get_sheet_names()
-        if author_name in sheets_name:
-            ws = wb.get_sheet_by_name(author_name)
-            # print('该作者的论文信息已收集过，进入下一个作者的信息收集')
-            # return
-        else:
-            ws = wb.create_sheet(author_name)
-            titles = ['题名', '作者', '来源', '发表时间', '数据库']
-            line = [title for title in titles]
-            ws.append(line)
-    else:
-        if not os.path.exists(path):
-            os.mkdir(path)
-        wb = openpyxl.Workbook()
-        ws = wb.active
-        ws.title = author_name
+        ws = wb.create_sheet(index=0, title='result')
         titles = ['题名', '作者', '来源', '发表时间', '数据库']
         line = [title for title in titles]
         ws.append(line)
@@ -107,3 +104,37 @@ def write_to_excel(res, author_name):
     ws.append(line)
     wb.save(out_path)
     # print('成功添加一条【' + author_name + '】的记录')
+
+
+def change_tmp_status(author_name):
+    file_path = os.getcwd() + os.sep + 'result' + os.sep + 'result.xlsx'
+    wb = openpyxl.load_workbook(file_path)
+    ws = wb.get_sheet_by_name('tmp')
+
+    for i in range(1, ws.max_row+1):
+        # print(ws['A'+str(i)])
+        # continue
+        if ws['A'+str(i)].value == author_name:
+            ws['B'+str(i)].value ='solved'
+            wb.save(file_path)
+            break
+
+
+def delete_sheet_tmp():
+    file_path = os.getcwd() + os.sep + 'result' + os.sep + 'result.xlsx'
+    wb = openpyxl.load_workbook(file_path)
+    wb.remove_sheet(wb.get_sheet_by_name('tmp'))
+    wb.save(file_path)
+
+
+def get_time_input(message):
+    while(True):
+        vaule = input(message)
+        if vaule == '':
+            return vaule
+        # elif re.match(r'^\d{4}(-\d\d){2}$', vaule):
+        elif re.match(r'^((19(79|[89][0-9]))|(20(0[0-9]|1[0-7])))-(0[1-9]|1[0-2])-(0[1-9]|1[0-9]|2[0-9]|3[0-1])$', vaule):
+            return vaule
+        else:
+            print('输入的日期不合法，请重新输入！')
+
